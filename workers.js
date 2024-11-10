@@ -34,6 +34,16 @@ addEventListener('fetch', event => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enhanced Flashcard App</title>
     <style>
+        /* CSS for recording indicator */
+        .dot {
+            height: 10px;
+            width: 10px;
+            background-color: red;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        
         /* Reset some default styles */
         * {
             box-sizing: border-box;
@@ -266,6 +276,14 @@ addEventListener('fetch', event => {
     <div id="startScreen">
         <button id="startQuizBtn">Start Quiz</button>
     </div>
+    
+    <!-- Start/Stop Recording Button -->
+    <button id="toggleRecordingBtn">Start Recording</button>
+    
+    <!-- Recording Indicator -->
+    <div id="recordingIndicator" style="display: none;">
+        <span class="dot"></span> Recording...
+    </div>
 
     <!-- Quiz Content -->
     <div id="quizContent" style="display:none;">
@@ -342,6 +360,8 @@ addEventListener('fetch', event => {
     ]
 
     let currentCard = 0
+    const toggleRecordingBtn = document.getElementById('toggleRecordingBtn');
+    let isRecording = false;
     let mediaRecorder
     let audioChunks = []
     let transcribedText = ''
@@ -390,9 +410,14 @@ addEventListener('fetch', event => {
         gptFeedbackEl.textContent = ''
         // Hide evaluation indicators
         analyzingIndicator.style.display = 'none'
-        // Start recording automatically
-        startRecording()
-    }
+        // Start recording button
+        toggleRecordingBtn.addEventListener('click', () => {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+    });
 
     // Handle navigation
     prevBtn.addEventListener('click', () => {
@@ -420,7 +445,8 @@ addEventListener('fetch', event => {
             .then(stream => {
                 mediaRecorder = new MediaRecorder(stream)
                 mediaRecorder.start()
-                showAnswerBtn.disabled = false
+                isRecording = true;
+                toggleRecordingBtn.textContent = 'Stop recording'
                 audioChunks = []
 
                 // Show recording indicator
@@ -449,7 +475,9 @@ addEventListener('fetch', event => {
     function stopRecording() {
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
             mediaRecorder.stop()
-            showAnswerBtn.disabled = true
+            isRecording = false;
+            toggleRecordingBtn.textContent = 'Start recorrding'
+            //showAnswerBtn.disabled = true
         }
     }
 
